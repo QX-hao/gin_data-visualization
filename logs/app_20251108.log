@@ -1,0 +1,34 @@
+2025/11/08 19:56:23 init.go:38: 日志系统初始化完成
+2025/11/08 19:56:23 init.go:199: 配置验证通过
+2025/11/08 19:56:23 init.go:101: 数据库连接成功: root@localhost:3306/gin_data_visualization
+2025/11/08 19:56:23 init.go:68: 数据库连接成功 (第1次重试)
+2025/11/08 19:56:23 init.go:110: 数据库迁移完成
+2025/11/08 19:56:23 init.go:234: 系统信息: map[go_arch:amd64 go_os:windows go_version:go1.24.7 goroutines:3 memory_alloc:1786856 memory_frees:722 memory_lookups:0 memory_mallocs:11922 memory_sys:7098368 memory_total:1786856 num_cpu:16 start_time:2025-11-08 19:56:23]
+2025/11/08 19:56:23 init.go:236: 所有组件初始化完成
+2025/11/08 19:56:23 main.go:62: 服务器启动在端口 123456
+2025/11/08 19:56:23 main.go:42: 服务器启动失败: listen tcp: address 123456: invalid port
+2025/11/08 19:57:29 init.go:38: 日志系统初始化完成
+2025/11/08 19:57:29 init.go:199: 配置验证通过
+2025/11/08 19:57:29 init.go:101: 数据库连接成功: root@localhost:3306/gin_data_visualization
+2025/11/08 19:57:29 init.go:68: 数据库连接成功 (第1次重试)
+2025/11/08 19:57:29 init.go:110: 数据库迁移完成
+2025/11/08 19:57:29 init.go:234: 系统信息: map[go_arch:amd64 go_os:windows go_version:go1.24.7 goroutines:3 memory_alloc:1787456 memory_frees:721 memory_lookups:0 memory_mallocs:11925 memory_sys:6836224 memory_total:1787456 num_cpu:16 start_time:2025-11-08 19:57:29]
+2025/11/08 19:57:29 init.go:236: 所有组件初始化完成
+2025/11/08 19:57:29 main.go:62: 服务器启动在端口 123456
+2025/11/08 19:57:29 main.go:42: 服务器启动失败: listen tcp: address 123456: invalid port
+2025/11/08 19:58:22 init.go:38: 日志系统初始化完成
+2025/11/08 19:58:22 init.go:199: 配置验证通过
+2025/11/08 19:58:22 init.go:101: 数据库连接成功: root@localhost:3306/gin_data_visualization
+2025/11/08 19:58:22 init.go:68: 数据库连接成功 (第1次重试)
+2025/11/08 19:58:22 init.go:110: 数据库迁移完成
+2025/11/08 19:58:22 init.go:234: 系统信息: map[go_arch:amd64 go_os:windows go_version:go1.24.7 goroutines:3 memory_alloc:1786992 memory_frees:722 memory_lookups:0 memory_mallocs:11920 memory_sys:7098368 memory_total:1786992 num_cpu:16 start_time:2025-11-08 19:58:22]
+2025/11/08 19:58:22 init.go:236: 所有组件初始化完成
+2025/11/08 19:58:22 main.go:62: 服务器启动在端口 12345
+2025/11/08 20:05:17 init.go:38: 日志系统初始化完成
+2025/11/08 20:05:17 init.go:199: 配置验证通过
+2025/11/08 20:05:17 init.go:101: 数据库连接成功: root@localhost:3306/gin_data_visualization
+2025/11/08 20:05:17 init.go:68: 数据库连接成功 (第1次重试)
+2025/11/08 20:05:17 init.go:110: 数据库迁移完成
+2025/11/08 20:05:17 init.go:234: 系统信息: map[go_arch:amd64 go_os:windows go_version:go1.24.7 goroutines:3 memory_alloc:1788040 memory_frees:722 memory_lookups:0 memory_mallocs:11929 memory_sys:6836224 memory_total:1788040 num_cpu:16 start_time:2025-11-08 20:05:17]
+2025/11/08 20:05:17 init.go:236: 所有组件初始化完成
+2025/11/08 20:05:17 main.go:62: 服务器启动在端口 12345
