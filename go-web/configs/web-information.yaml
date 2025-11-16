@@ -1,0 +1,6 @@
+AppName: gin-data-visualization
+  Host: 0.0.0.0
+  Port: 1234
+
+Auth:
+  JWTSecret: 123456
