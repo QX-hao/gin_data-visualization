@@ -1,6 +1,11 @@
-AppName: gin-data-visualization
+Server: gin-data-visualization
   Host: 0.0.0.0
   Port: 1234
 
-Auth:
-  JWTSecret: 123456
+jwt:
+  secret: "your-super-secret-jwt-key-change-in-production"
+  access_token_expire: "15m"    # 访问令牌15分钟过期
+  refresh_token_expire: "7d"    # 刷新令牌7天过期
+
+security:
+  bcrypt_cost: 12
