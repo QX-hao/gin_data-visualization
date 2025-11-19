@@ -8,8 +8,6 @@ import (
 func SetupRouter() *gin.Engine{
 	
 	engine := gin.Default()
-
-
 	
 	api := engine.Group("/api/v1")
 	{

@@ -1,0 +1,43 @@
+<!-- 页面头部模板 -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h2 class="text-center mb-0">
+                        <i class="fas fa-code me-2"></i>
+                        Go-Web API 测试界面
+                    </h2>
+                    <p class="text-muted text-center mb-0">基于 Gin 框架的后端接口测试</p>
+                </div>
+                <div class="card-body">
+                    <!-- 服务器配置 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">服务器地址</label>
+                            <input type="text" class="form-control" id="serverUrl" value="http://localhost:1234">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">API 基础路径</label>
+                            <input type="text" class="form-control" id="apiBase" value="/api/v1" readonly>
+                        </div>
+                    </div>
+
+                    <!-- 导航标签 -->
+                    <ul class="nav nav-tabs mb-4" id="apiTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="auth-tab" data-bs-toggle="tab" data-bs-target="#auth" type="button" role="tab">
+                                <i class="fas fa-user-shield me-2"></i>认证接口
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="public-tab" data-bs-toggle="tab" data-bs-target="#public" type="button" role="tab">
+                                <i class="fas fa-globe me-2"></i>公开接口
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="protected-tab" data-bs-toggle="tab" data-bs-target="#protected" type="button" role="tab">
+                                <i class="fas fa-lock me-2"></i>受保护接口
+                            </button>
+                        </li>
+                    </ul>

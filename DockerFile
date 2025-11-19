@@ -1,0 +1,124 @@
+# 全栈开发环境镜像 - Ubuntu 22.04 + Go + Node.js + Python + Nginx + Git
+FROM ubuntu:22.04
+
+# 设置非交互式安装
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 更新包管理器并安装基础工具
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    vim \
+    nano \
+    build-essential \
+    python3 \
+    python3-pip \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    software-properties-common \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Go 1.21+ (最新稳定版)
+RUN wget https://golang.org/dl/go1.21.6.linux-amd64.tar.gz \
+    && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz \
+    && rm go1.21.6.linux-amd64.tar.gz
+
+# 安装 Node.js 18 LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# 设置环境变量
+ENV GOPATH=/go
+ENV PATH=/usr/local/go/bin:$PATH:$GOPATH/bin
+ENV GOROOT=/usr/local/go
+
+# 创建工作目录
+RUN mkdir -p /go/src /go/bin /go/pkg
+RUN mkdir -p /app/frontend /app/backend
+WORKDIR /app
+
+# 安装常用的Go工具
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest \
+    && go install github.com/cosmtrek/air@latest \
+    && go install github.com/swaggo/swag/cmd/swag@latest
+
+# 安装常用的Python包
+RUN pip3 install requests flask
+
+# 安装前端工具
+RUN npm install -g \
+    http-server \
+    create-react-app \
+    @vue/cli \
+    yarn \
+    pnpm \
+    webpack \
+    webpack-cli \
+    parcel-bundler
+
+# 配置Nginx
+RUN mkdir -p /var/log/nginx \
+    && mkdir -p /etc/nginx/sites-available \
+    && mkdir -p /etc/nginx/sites-enabled
+
+# 创建Nginx配置文件
+RUN echo 'server {\n' \
+    '    listen 80;\n' \
+    '    server_name localhost;\n' \
+    '    root /app/frontend;\n' \
+    '    index index.html index.htm;\n' \
+    '    location / {\n' \
+    '        try_files $uri $uri/ /index.html;\n' \
+    '    }\n' \
+    '    location /api/ {\n' \
+    '        proxy_pass http://localhost:1234;\n' \
+    '        proxy_set_header Host $host;\n' \
+    '        proxy_set_header X-Real-IP $remote_addr;\n' \
+    '    }\n' \
+    '}' > /etc/nginx/sites-available/default
+
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+
+# 创建非root用户
+RUN useradd -m -s /bin/bash developer \
+    && chown -R developer:developer /app \
+    && chown -R developer:developer /go \
+    && chown -R developer:developer /var/log/nginx
+
+USER developer
+
+# 设置默认shell
+SHELL ["/bin/bash", "-c"]
+
+# 验证安装
+RUN echo "=== 全栈环境验证 ===" \
+    && echo "Go版本:" && go version \
+    && echo "Node.js版本:" && node --version \
+    && echo "npm版本:" && npm --version \
+    && echo "Python版本:" && python3 --version \
+    && echo "Git版本:" && git --version \
+    && echo "Nginx版本:" && nginx -v \
+    && echo "环境安装完成！"
+
+# 暴露所有常用端口
+EXPOSE 80     # HTTP (Nginx)
+EXPOSE 443    # HTTPS (Nginx)
+EXPOSE 1234   # 后端API端口
+EXPOSE 3000   # React开发服务器
+EXPOSE 3001   # 备用前端端口
+EXPOSE 8000   # Python HTTP服务器
+EXPOSE 8080   # 备用Web服务器端口
+EXPOSE 8081   # 备用端口
+EXPOSE 9000   # 开发服务器端口
+EXPOSE 5000   # Flask开发服务器
+EXPOSE 5432   # PostgreSQL
+EXPOSE 3306   # MySQL
+EXPOSE 27017  # MongoDB
+EXPOSE 6379   # Redis
+EXPOSE 9200   # Elasticsearch
+EXPOSE 5601   # Kibana
+
+CMD ["bash"]
