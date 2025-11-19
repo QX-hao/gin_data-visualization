@@ -1,4 +1,5 @@
-Server: gin-data-visualization
+Server:
+  Name: gin-data-visualization
   Host: 0.0.0.0
   Port: 1234
 
