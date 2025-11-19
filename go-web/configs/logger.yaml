@@ -1,6 +1,6 @@
 # 日志配置
 level: "info"           # 日志级别: debug, info, warn, error
-format: "json"          # 日志格式: json, console
+format: "console"          # 日志格式: json, console
 output: "both"          # 输出目标: file, console, both
 file_path: "logs/app.log" # 日志文件路径
 max_size: 100           # 单个日志文件最大大小(MB)
