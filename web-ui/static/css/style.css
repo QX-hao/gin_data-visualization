@@ -1,4 +1,4 @@
-/* Go-Web 前端演示样式 */
+/* 数据可视化管理平台样式 */
 
 /* 基础样式 */
 body {
@@ -7,80 +7,73 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* 卡片样式 */
-.card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+/* 登录注册容器 */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 0.6s ease;
 }
 
-/* 导航标签样式 */
-.nav-tabs .nav-link {
-    border: none;
-    color: #6c757d;
-    font-weight: 500;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.nav-tabs .nav-link.active {
+/* 标题样式 */
+.auth-card h2 {
+    color: #333;
+    font-size: 1.8rem;
+}
+
+.auth-card .text-primary {
+    color: #667eea !important;
+}
+
+/* 标签样式 */
+.nav-pills .nav-link {
+    color: #666;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link.active {
     background: linear-gradient(45deg, #667eea, #764ba2);
     color: white;
-    border-radius: 10px;
 }
 
-/* 按钮样式 */
-.btn-primary {
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    border: none;
-    border-radius: 8px;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(45deg, #5a6fd8, #6a4190);
-    transform: translateY(-1px);
-}
-
-/* API 结果展示样式 */
-.api-result {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #e9ecef;
-}
-
-.api-result pre {
-    background: #2d3748;
-    color: #e2e8f0;
-    padding: 10px;
-    border-radius: 5px;
-    overflow-x: auto;
-    margin: 10px 0;
-}
-
-/* 状态样式 */
-.status-success {
-    color: #28a745;
-    font-weight: bold;
-}
-
-.status-error {
-    color: #dc3545;
-    font-weight: bold;
+.nav-pills .nav-link:hover:not(.active) {
+    background: #f0f0f0;
 }
 
 /* 表单样式 */
+.form-label {
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
 .form-control {
-    border-radius: 8px;
-    border: 1px solid #ced4da;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 12px 15px;
     transition: all 0.3s ease;
 }
 
@@ -89,63 +82,64 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
+/* 按钮样式 */
+.btn-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #5a6fd8, #6a4190);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* 链接样式 */
+a {
+    color: #667eea;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #764ba2;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 /* 响应式调整 */
-@media (max-width: 768px) {
-    .container {
-        padding: 20px 10px;
+@media (max-width: 576px) {
+    .auth-card {
+        padding: 30px 20px;
     }
     
-    .card {
-        margin: 0 10px;
+    .auth-card h2 {
+        font-size: 1.5rem;
     }
     
-    .nav-tabs .nav-link {
-        font-size: 14px;
-        padding: 8px 12px;
+    .auth-card i.fa-4x {
+        font-size: 3rem;
     }
 }
 
-/* 加载动画 */
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+/* 主页面样式 */
+.bg-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2) !important;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* 自定义滚动条 */
-.api-result::-webkit-scrollbar {
-    width: 8px;
-}
-
-.api-result::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.api-result::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.api-result::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* 图标样式增强 */
-.fas, .fab {
-    margin-right: 8px;
-}
-
-/* 警告框样式 */
+/* 提示框样式 */
 .alert {
     border-radius: 10px;
     border: none;
@@ -156,13 +150,8 @@ body {
     color: #0c5460;
 }
 
-/* 输入组样式 */
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group-text {
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    border: none;
+/* 加载状态 */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
