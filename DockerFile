@@ -12,52 +12,80 @@ RUN apt-get update && apt-get install -y \
     vim \
     nano \
     build-essential \
-    python3 \
-    python3-pip \
     ca-certificates \
     gnupg \
     lsb-release \
     software-properties-common \
-    nginx \
+    zlib1g-dev \
+    libssl-dev \
+    libffi-dev \
+    libsqlite3-dev \
+    libreadline-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libpcre3-dev \
+    libpcre++-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Go 1.21+ (最新稳定版)
+# 安装 Go 1.21+ (官方源)
 RUN wget https://golang.org/dl/go1.21.6.linux-amd64.tar.gz \
     && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz \
     && rm go1.21.6.linux-amd64.tar.gz
 
+# 安装 Python 3.11
+RUN wget https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz \
+    && tar -xzf Python-3.11.7.tgz -C /usr/local/src/ \
+    && cd /usr/local/src/Python-3.11.7 \
+    && ./configure --enable-optimizations \
+    && make -j$(nproc) \
+    && make altinstall \
+    && cd / \
+    && rm -rf /usr/local/src/Python-3.11.7 Python-3.11.7.tgz \
+    && ln -sf /usr/local/bin/python3.11 /usr/local/bin/python3 \
+    && ln -sf /usr/local/bin/python3.11 /usr/local/bin/python \
+    && ln -sf /usr/local/bin/pip3.11 /usr/local/bin/pip
+
 # 安装 Node.js 18 LTS
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+RUN wget https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.xz \
+    && tar -xJf node-v18.19.0-linux-x64.tar.xz \
+    && mv node-v18.19.0-linux-x64 /usr/local/node \
+    && rm node-v18.19.0-linux-x64.tar.xz \
+    && ln -sf /usr/local/node/bin/node /usr/local/bin/node \
+    && ln -sf /usr/local/node/bin/npm /usr/local/bin/npm \
+    && ln -sf /usr/local/node/bin/npx /usr/local/bin/npx
+
+# 安装 Nginx
+RUN wget https://nginx.org/download/nginx-1.24.0.tar.gz \
+    && tar -xzf nginx-1.24.0.tar.gz -C /usr/local/src/ \
+    && cd /usr/local/src/nginx-1.24.0 \
+    && ./configure --prefix=/usr/local/nginx \
+        --with-http_ssl_module \
+        --with-http_v2_module \
+        --with-http_realip_module \
+        --with-http_gzip_static_module \
+    && make -j$(nproc) \
+    && make install \
+    && cd / \
+    && rm -rf /usr/local/src/nginx-1.24.0 nginx-1.24.0.tar.gz \
+    && ln -sf /usr/local/nginx/sbin/nginx /usr/local/bin/nginx
 
 # 设置环境变量
 ENV GOPATH=/go
-ENV PATH=/usr/local/go/bin:$PATH:$GOPATH/bin
+ENV PATH=/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/local/node/bin:/usr/local/nginx/sbin:/usr/local/bin
 ENV GOROOT=/usr/local/go
+ENV GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy/,https://goproxy.io,direct
+ENV GOSUMDB=sum.golang.google.cn
 
-# 创建工作目录
+# 创建工作目录（简化版本）
 RUN mkdir -p /go/src /go/bin /go/pkg
-RUN mkdir -p /app/frontend /app/backend
-WORKDIR /app
 
-# 安装常用的Go工具
-RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest \
-    && go install github.com/cosmtrek/air@latest \
-    && go install github.com/swaggo/swag/cmd/swag@latest
+# 设置root密码（密码：root123）
+RUN echo 'root:root123' | chpasswd
 
-# 安装常用的Python包
-RUN pip3 install requests flask
+WORKDIR /
 
-# 安装前端工具
-RUN npm install -g \
-    http-server \
-    create-react-app \
-    @vue/cli \
-    yarn \
-    pnpm \
-    webpack \
-    webpack-cli \
-    parcel-bundler
+# 移除Go和Python的常用工具包安装以加快构建速度
+# 这些工具可以在容器运行时根据需要安装
 
 # 配置Nginx
 RUN mkdir -p /var/log/nginx \
@@ -65,30 +93,8 @@ RUN mkdir -p /var/log/nginx \
     && mkdir -p /etc/nginx/sites-enabled
 
 # 创建Nginx配置文件
-RUN echo 'server {\n' \
-    '    listen 80;\n' \
-    '    server_name localhost;\n' \
-    '    root /app/frontend;\n' \
-    '    index index.html index.htm;\n' \
-    '    location / {\n' \
-    '        try_files $uri $uri/ /index.html;\n' \
-    '    }\n' \
-    '    location /api/ {\n' \
-    '        proxy_pass http://localhost:1234;\n' \
-    '        proxy_set_header Host $host;\n' \
-    '        proxy_set_header X-Real-IP $remote_addr;\n' \
-    '    }\n' \
-    '}' > /etc/nginx/sites-available/default
-
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
-
-# 创建非root用户
-RUN useradd -m -s /bin/bash developer \
-    && chown -R developer:developer /app \
-    && chown -R developer:developer /go \
-    && chown -R developer:developer /var/log/nginx
-
-USER developer
+RUN mkdir -p /usr/local/nginx/conf \
+    && printf 'events {\n    worker_connections 1024;\n}\n\nhttp {\n    include       mime.types;\n    default_type  application/octet-stream;\n\n    server {\n        listen 80;\n        server_name localhost;\n        root /;\n        index index.html index.htm;\n\n        location / {\n            try_files $uri $uri/ =404;\n        }\n    }\n}\n' > /usr/local/nginx/conf/nginx.conf
 
 # 设置默认shell
 SHELL ["/bin/bash", "-c"]
@@ -104,21 +110,39 @@ RUN echo "=== 全栈环境验证 ===" \
     && echo "环境安装完成！"
 
 # 暴露所有常用端口
-EXPOSE 80     # HTTP (Nginx)
-EXPOSE 443    # HTTPS (Nginx)
-EXPOSE 1234   # 后端API端口
-EXPOSE 3000   # React开发服务器
-EXPOSE 3001   # 备用前端端口
-EXPOSE 8000   # Python HTTP服务器
-EXPOSE 8080   # 备用Web服务器端口
-EXPOSE 8081   # 备用端口
-EXPOSE 9000   # 开发服务器端口
-EXPOSE 5000   # Flask开发服务器
-EXPOSE 5432   # PostgreSQL
-EXPOSE 3306   # MySQL
-EXPOSE 27017  # MongoDB
-EXPOSE 6379   # Redis
-EXPOSE 9200   # Elasticsearch
-EXPOSE 5601   # Kibana
+# EXPOSE 80     # HTTP (Nginx)
+# EXPOSE 443    # HTTPS (Nginx)
+# EXPOSE 1234   # 后端API端口
+# EXPOSE 3000   # React开发服务器
+# EXPOSE 3001   # 备用前端端口
+# EXPOSE 8000   # Python HTTP服务器
+# EXPOSE 8080   # 备用Web服务器端口
+# EXPOSE 8081   # 备用端口
+# EXPOSE 9000   # 开发服务器端口
+# EXPOSE 5000   # Flask开发服务器
+# EXPOSE 5432   # PostgreSQL
+# EXPOSE 3306   # MySQL
+# EXPOSE 27017  # MongoDB
+# EXPOSE 6379   # Redis
+# EXPOSE 9200   # Elasticsearch
+# EXPOSE 5601   # Kibana
 
-CMD ["bash"]
+# 暴露所有常用端口
+EXPOSE 80
+EXPOSE 443
+EXPOSE 1234
+EXPOSE 3000
+EXPOSE 3001
+EXPOSE 8000
+EXPOSE 8080
+EXPOSE 8081
+EXPOSE 9000
+EXPOSE 5000
+EXPOSE 5432
+EXPOSE 3306
+EXPOSE 27017
+EXPOSE 6379
+EXPOSE 9200
+EXPOSE 5601
+
+CMD ["tail", "-f", "/dev/null"]

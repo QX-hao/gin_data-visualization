@@ -1,0 +1,10 @@
+services:
+  dev-env-ubuntu-22.04:
+    image: dev-ubuntu22.04:v1.0
+    container_name: dev-env-ubuntu-22.04
+    volumes:
+      - /data/dev-env:/data/dev-env
+    entrypoint: /bin/bash
+    network_mode: host
+    privileged: true
+    restart: always
