@@ -1,33 +1,31 @@
-// Go-Web API 前端测试脚本
-class ApiTester {
+// 数据可视化管理平台 - 前端逻辑
+
+class AuthApp {
     constructor() {
-        this.baseUrl = 'http://localhost:1234';
+        // API 基础地址 - 使用相对路径，通过nginx代理
+        this.baseUrl = '';
         this.apiBase = '/api/v1';
         this.token = localStorage.getItem('jwt_token') || '';
+        this.currentUser = JSON.parse(localStorage.getItem('user_info') || 'null');
+        
+        console.log('🔧 API 配置:', this.baseUrl + this.apiBase);
+        
         this.init();
     }
 
     init() {
-        // 从本地存储加载配置
-        const savedUrl = localStorage.getItem('server_url');
-        if (savedUrl) {
-            this.baseUrl = savedUrl;
-            document.getElementById('serverUrl').value = savedUrl;
+        // 检查是否已登录
+        if (this.token && this.currentUser) {
+            this.showMainPage();
         }
-        
-        // 监听服务器地址变化
-        document.getElementById('serverUrl').addEventListener('change', (e) => {
-            this.baseUrl = e.target.value;
-            localStorage.setItem('server_url', this.baseUrl);
-        });
-
-        // 显示当前令牌状态
-        this.updateTokenStatus();
     }
 
     // 通用 API 调用方法
     async callApi(endpoint, method = 'GET', data = null, requiresAuth = false) {
         const url = `${this.baseUrl}${this.apiBase}${endpoint}`;
+        console.log('🚀 发送请求:', method, url);
+        console.log('📦 请求数据:', data);
+        
         const options = {
             method: method,
             headers: {
@@ -43,298 +41,152 @@ class ApiTester {
             options.body = JSON.stringify(data);
         }
 
-        // 显示加载状态
-        this.showLoading(endpoint);
-
         try {
             const response = await fetch(url, options);
             const result = await response.json();
             
+            console.log('✅ 响应状态:', response.status);
+            console.log('📥 响应数据:', result);
+            
             return {
                 success: response.ok,
                 status: response.status,
-                data: result,
-                headers: Object.fromEntries(response.headers.entries())
+                data: result
             };
         } catch (error) {
+            console.error('❌ 请求失败:', error);
             return {
                 success: false,
                 error: error.message,
                 status: 0
             };
-        } finally {
-            this.hideLoading(endpoint);
         }
     }
 
-    // 显示加载状态
-    showLoading(endpoint) {
-        const button = document.querySelector(`[onclick*="${endpoint.split('/').pop()}"]`);
-        if (button) {
-            button.disabled = true;
-            button.innerHTML = `<span class="loading"></span> 请求中...`;
-        }
-    }
-
-    // 隐藏加载状态
-    hideLoading(endpoint) {
-        const button = document.querySelector(`[onclick*="${endpoint.split('/').pop()}"]`);
-        if (button) {
-            button.disabled = false;
-            // 恢复原始文本（需要根据具体按钮调整）
-            const originalText = this.getButtonOriginalText(endpoint);
-            button.innerHTML = originalText;
-        }
-    }
-
-    // 获取按钮原始文本
-    getButtonOriginalText(endpoint) {
-        const textMap = {
-            'register': '<i class="fas fa-user-plus me-2"></i>注册',
-            'login': '<i class="fas fa-sign-in-alt me-2"></i>登录',
-            'logout': '<i class="fas fa-sign-out-alt me-2"></i>登出',
-            'refreshToken': '<i class="fas fa-sync-alt me-2"></i>刷新令牌',
-            'forgotPassword': '<i class="fas fa-key me-2"></i>忘记密码',
-            'testHealth': '<i class="fas fa-heartbeat me-2"></i>测试健康检查',
-            'getProfile': '<i class="fas fa-user me-2"></i>获取用户资料',
-            'updateProfile': '<i class="fas fa-edit me-2"></i>更新用户资料',
-            'changePassword': '<i class="fas fa-lock me-2"></i>修改密码'
-        };
-        return textMap[endpoint.split('/').pop()] || '操作';
-    }
-
-    // 显示结果
-    displayResult(tabId, result) {
-        const resultElement = document.getElementById(tabId + 'Result');
-        const timestamp = new Date().toLocaleString();
-        
-        let html = `<div class="mb-3 p-3 rounded ${result.success ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10'}">
-            <span class="${result.success ? 'status-success' : 'status-error'}">
-                ${result.success ? '✅ 成功' : '❌ 失败'} - ${timestamp}
-            </span>
-        </div>`;
-
-        if (result.status) {
-            html += `<div class="mb-2"><strong>状态码:</strong> <code>${result.status}</code></div>`;
-        }
-
-        if (result.error) {
-            html += `<div class="mb-2"><strong>错误:</strong> <span class="text-danger">${result.error}</span></div>`;
-        }
-
-        if (result.data) {
-            html += `<div class="mb-2"><strong>响应数据:</strong></div>
-                    <pre class="p-3 rounded bg-dark text-light">${JSON.stringify(result.data, null, 2)}</pre>`;
-        }
-
-        if (result.headers) {
-            html += `<div class="mb-2"><strong>响应头:</strong></div>
-                    <pre class="p-3 rounded bg-secondary text-light">${JSON.stringify(result.headers, null, 2)}</pre>`;
-        }
-
-        // 限制最多显示5条记录
-        const currentContent = resultElement.innerHTML;
-        const records = currentContent.split('<div class="mb-3 p-3 rounded');
-        if (records.length > 5) {
-            resultElement.innerHTML = html + currentContent.split('<div class="mb-3 p-3 rounded').slice(0, 4).join('<div class="mb-3 p-3 rounded');
-        } else {
-            resultElement.innerHTML = html + currentContent;
-        }
-
-        // 自动滚动到最新结果
-        resultElement.scrollTop = 0;
-    }
-
-    // 更新令牌状态显示
-    updateTokenStatus() {
-        const tokenStatus = document.getElementById('tokenStatus');
-        if (tokenStatus) {
-            tokenStatus.textContent = this.token ? '✅ 已登录' : '❌ 未登录';
-            tokenStatus.className = this.token ? 'badge bg-success' : 'badge bg-danger';
-        }
-    }
-
-    // 认证接口
-    async register() {
-        const username = document.getElementById('registerUsername').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-
-        if (!username || !email || !password) {
-            this.showAlert('请填写所有必填字段', 'warning');
-            return;
-        }
-
+    // 注册功能
+    async register(username, email, password) {
         const result = await this.callApi('/auth/register', 'POST', {
             username: username,
             email: email,
             password: password
         });
 
-        this.displayResult('auth', result);
-    }
-
-    async login() {
-        const identifier = document.getElementById('loginIdentifier').value;
-        const password = document.getElementById('loginPassword').value;
-
-        if (!identifier || !password) {
-            this.showAlert('请填写用户名/邮箱和密码', 'warning');
-            return;
+        if (result.success) {
+            this.showAlert('注册成功!请登录', 'success');
+            // 切换到登录标签
+            const loginTab = document.getElementById('login-tab');
+            loginTab.click();
+            // 自动填充用户名
+            document.getElementById('loginIdentifier').value = username;
+        } else {
+            const errorMsg = result.data?.message || result.error || '注册失败,请重试';
+            this.showAlert(errorMsg, 'danger');
         }
 
+        return result;
+    }
+
+    // 登录功能
+    async login(identifier, password) {
         const result = await this.callApi('/auth/login', 'POST', {
-            identifier: identifier,
+            username: identifier,
             password: password
         });
 
         if (result.success && result.data && result.data.token) {
             this.token = result.data.token;
+            this.currentUser = result.data.user || { username: identifier };
+            
+            // 保存到本地存储
             localStorage.setItem('jwt_token', this.token);
-            this.updateTokenStatus();
-            this.showAlert('登录成功！', 'success');
+            localStorage.setItem('user_info', JSON.stringify(this.currentUser));
+            
+            this.showAlert('登录成功!', 'success');
+            
+            // 延迟显示主页面
+            setTimeout(() => {
+                this.showMainPage();
+            }, 500);
+        } else {
+            const errorMsg = result.data?.message || result.error || '登录失败,请检查用户名和密码';
+            this.showAlert(errorMsg, 'danger');
         }
 
-        this.displayResult('auth', result);
+        return result;
     }
 
+    // 登出功能
     async logout() {
-        const result = await this.callApi('/auth/logout', 'POST', null, true);
+        // 调用后端API
+        await this.callApi('/auth/logout', 'POST', null, true);
         
-        if (result.success) {
-            this.token = '';
-            localStorage.removeItem('jwt_token');
-            this.updateTokenStatus();
-            this.showAlert('已登出', 'info');
-        }
-
-        this.displayResult('auth', result);
+        // 清除本地存储
+        this.token = '';
+        this.currentUser = null;
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_info');
+        
+        this.showAlert('已退出登录', 'info');
+        
+        // 返回登录页面
+        setTimeout(() => {
+            this.showAuthPage();
+        }, 500);
     }
 
-    async refreshToken() {
-        const result = await this.callApi('/auth/refresh', 'POST', null, true);
-        
-        if (result.success && result.data && result.data.token) {
-            this.token = result.data.token;
-            localStorage.setItem('jwt_token', this.token);
-            this.updateTokenStatus();
-            this.showAlert('令牌刷新成功！', 'success');
-        }
-
-        this.displayResult('auth', result);
-    }
-
-    async forgotPassword() {
-        const email = prompt('请输入您的邮箱地址：');
-        if (!email) return;
-
+    // 忘记密码
+    async forgotPassword(email) {
         const result = await this.callApi('/auth/forgot-password', 'POST', {
             email: email
         });
 
-        this.displayResult('auth', result);
-    }
-
-    async resetPassword() {
-        const token = prompt('请输入重置令牌：');
-        const newPassword = prompt('请输入新密码：');
-        
-        if (!token || !newPassword) return;
-
-        const result = await this.callApi('/auth/reset-password', 'POST', {
-            token: token,
-            new_password: newPassword
-        });
-
-        this.displayResult('auth', result);
-    }
-
-    // 公开接口
-    async testHealth() {
-        const result = await this.callApi('/public/health', 'GET');
-        this.displayResult('public', result);
-    }
-
-    // 受保护接口
-    async getProfile() {
-        if (!this.token) {
-            this.showAlert('请先登录获取令牌', 'warning');
-            return;
-        }
-
-        const result = await this.callApi('/protected/users/profile', 'GET', null, true);
-        this.displayResult('protected', result);
-    }
-
-    async updateProfile() {
-        if (!this.token) {
-            this.showAlert('请先登录获取令牌', 'warning');
-            return;
-        }
-
-        const username = prompt('请输入新的用户名（留空保持不变）：');
-        const email = prompt('请输入新的邮箱（留空保持不变）：');
-        
-        const updateData = {};
-        if (username) updateData.username = username;
-        if (email) updateData.email = email;
-
-        if (Object.keys(updateData).length === 0) {
-            this.showAlert('没有提供任何更新信息', 'info');
-            return;
-        }
-
-        const result = await this.callApi('/protected/users/profile', 'PUT', updateData, true);
-        this.displayResult('protected', result);
-    }
-
-    async changePassword() {
-        if (!this.token) {
-            this.showAlert('请先登录获取令牌', 'warning');
-            return;
-        }
-
-        const oldPassword = prompt('请输入当前密码：');
-        const newPassword = prompt('请输入新密码：');
-        
-        if (!oldPassword || !newPassword) {
-            this.showAlert('请填写所有密码字段', 'warning');
-            return;
-        }
-
-        const result = await this.callApi('/protected/users/password', 'PUT', {
-            old_password: oldPassword,
-            new_password: newPassword
-        }, true);
-
-        this.displayResult('protected', result);
-    }
-
-    // 手动设置令牌
-    setToken() {
-        const tokenInput = document.getElementById('jwtToken').value;
-        if (tokenInput) {
-            this.token = tokenInput;
-            localStorage.setItem('jwt_token', this.token);
-            this.updateTokenStatus();
-            this.showAlert('令牌设置成功！', 'success');
+        if (result.success) {
+            this.showAlert('密码重置邮件已发送,请检查您的邮箱', 'success');
         } else {
-            this.showAlert('请输入有效的 JWT 令牌', 'warning');
+            const errorMsg = result.data?.message || result.error || '发送失败,请重试';
+            this.showAlert(errorMsg, 'danger');
         }
+
+        return result;
+    }
+
+    // 显示主页面
+    showMainPage() {
+        document.getElementById('auth-page').classList.add('d-none');
+        document.getElementById('main-page').classList.remove('d-none');
+        
+        // 更新用户名显示
+        const usernameSpan = document.getElementById('currentUsername');
+        if (usernameSpan && this.currentUser) {
+            usernameSpan.textContent = this.currentUser.username || '用户';
+        }
+    }
+
+    // 显示登录页面
+    showAuthPage() {
+        document.getElementById('auth-page').classList.remove('d-none');
+        document.getElementById('main-page').classList.add('d-none');
+        
+        // 清空表单
+        document.getElementById('loginForm').reset();
+        document.getElementById('registerForm').reset();
     }
 
     // 显示提示信息
     showAlert(message, type = 'info') {
+        // 删除旧的提示
+        const oldAlerts = document.querySelectorAll('.custom-alert');
+        oldAlerts.forEach(alert => alert.remove());
+
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show custom-alert`;
+        alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
         alertDiv.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         
-        // 添加到页面顶部
-        const container = document.querySelector('.container');
-        container.insertBefore(alertDiv, container.firstChild);
+        document.body.appendChild(alertDiv);
         
         // 3秒后自动消失
         setTimeout(() => {
@@ -345,37 +197,80 @@ class ApiTester {
     }
 }
 
-// 全局函数供 HTML 调用
-const apiTester = new ApiTester();
+// 创建全局实例
+const app = new AuthApp();
 
-function register() { apiTester.register(); }
-function login() { apiTester.login(); }
-function logout() { apiTester.logout(); }
-function refreshToken() { apiTester.refreshToken(); }
-function forgotPassword() { apiTester.forgotPassword(); }
-function resetPassword() { apiTester.resetPassword(); }
-function testHealth() { apiTester.testHealth(); }
-function getProfile() { apiTester.getProfile(); }
-function updateProfile() { apiTester.updateProfile(); }
-function changePassword() { apiTester.changePassword(); }
-function setToken() { apiTester.setToken(); }
-
-// 页面加载完成后的初始化
-document.addEventListener('DOMContentLoaded', function() {
-    // 添加令牌状态显示
-    const protectedTab = document.getElementById('protected');
-    if (protectedTab) {
-        const statusHtml = `
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                当前令牌状态: <span id="tokenStatus" class="badge bg-secondary">${apiTester.token ? '✅ 已登录' : '❌ 未登录'}</span>
-            </div>
-        `;
-        protectedTab.insertAdjacentHTML('afterbegin', statusHtml);
+// 处理注册表单提交
+function handleRegister(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    
+    // 验证密码
+    if (password !== confirmPassword) {
+        app.showAlert('两次输入的密码不一致', 'warning');
+        return false;
     }
+    
+    if (password.length < 6) {
+        app.showAlert('密码长度至少6位', 'warning');
+        return false;
+    }
+    
+    // 禁用按钮
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>注册中...';
+    
+    // 调用注册接口
+    app.register(username, email, password).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>注册';
+    });
+    
+    return false;
+}
 
-    // 自动测试健康检查（可选）
-    setTimeout(() => {
-        // apiTester.testHealth();
-    }, 1000);
-});
+// 处理登录表单提交
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const identifier = document.getElementById('loginIdentifier').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!identifier || !password) {
+        app.showAlert('请输入用户名和密码', 'warning');
+        return false;
+    }
+    
+    // 禁用按钮
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>登录中...';
+    
+    // 调用登录接口
+    app.login(identifier, password).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>登录';
+    });
+    
+    return false;
+}
+
+// 处理登出
+function handleLogout() {
+    if (confirm('确定要退出登录吗?')) {
+        app.logout();
+    }
+}
+
+// 处理忘记密码
+function handleForgotPassword() {
+    const email = prompt('请输入您的注册邮箱:');
+    if (email && email.trim()) {
+        app.forgotPassword(email.trim());
+    }
+}
