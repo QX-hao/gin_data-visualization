@@ -1,6 +1,8 @@
 module go-web
 
-go 1.24.7
+go 1.23.0
+
+toolchain go1.24.10
 
 require (
 	github.com/gin-gonic/gin v1.11.0
