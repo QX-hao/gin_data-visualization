@@ -4,6 +4,7 @@ import (
 	"go-web/internal/dao"
 	"go-web/internal/moudels"
 	"go-web/pkg/logger"
+	"go-web/pkg/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -149,9 +150,22 @@ func LoginHandler(c *gin.Context) {
 
 	logger.Infow("用户登录成功", "user_id", user.ID, "username", user.Username)
 
-	c.JSON(http.StatusOK, models.SuccessResponse{
-		Message: "登录成功",
-		Data:    user,
+	// 生成访问令牌
+	accessToken, err := token.GenerateAccessToken(user.ID)
+	if err != nil {
+		logger.Errorw("生成访问令牌失败", "error", err, "user_id", user.ID)
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "生成令牌失败",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.AuthResponse{
+		Message:     "登录成功",
+		AccessToken: accessToken,
+		User:        &user,
 	})
 }
 

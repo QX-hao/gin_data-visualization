@@ -4,7 +4,7 @@ Server:
   Port: 1234
 
 jwt:
-  secret: "your-super-secret-jwt-key-change-in-production"
+  secret: "6d1d3d7e5f8f9a2b4c6d8e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b"  # 生产环境请更换为强随机密钥
   access_token_expire: "15m"    # 访问令牌15分钟过期
   refresh_token_expire: "7d"    # 刷新令牌7天过期
 
