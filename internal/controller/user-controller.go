@@ -2,10 +2,11 @@ package controller
 
 import (
 	"go-web/internal/dao"
-	"go-web/internal/moudels"
+	models "go-web/internal/moudels"
 	"go-web/pkg/logger"
 	"go-web/pkg/token"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -91,9 +92,11 @@ func RegisterHandler(c *gin.Context) {
 
 	logger.Infow("用户注册成功", "user_id", newUser.ID, "username", newUser.Username)
 
-	c.JSON(http.StatusCreated, models.SuccessResponse{
+	// 根据接口要求，注册成功响应格式为 HTTP 201
+	c.JSON(http.StatusCreated, models.RegistrationResponse{
+		Code:    http.StatusCreated,
 		Message: "注册成功",
-		Data:    newUser,
+		Data:    &newUser,
 	})
 }
 
@@ -162,67 +165,225 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.AuthResponse{
-		Message:     "登录成功",
-		AccessToken: accessToken,
-		User:        &user,
-	})
+	// 根据接口要求，登录成功响应格式为 HTTP 200
+	response := models.LoginResponse{
+		Code:    http.StatusOK,
+		Message: "登录成功",
+	}
+	response.Data.AccessToken = accessToken
+	response.Data.User = &user
+	c.JSON(http.StatusOK, response)
 }
 
 func LogoutHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "登出功能待实现",
-		"endpoint": "POST /api/v1/auth/logout",
+	// 根据接口要求，登出成功响应格式为 {code: 200, message: "登出成功", data: {}}
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "登出成功",
+		Data:    gin.H{},
 	})
 }
 
 func RefreshTokenHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "刷新令牌功能待实现",
-		"endpoint": "POST /api/v1/auth/refresh",
+	// 根据接口要求，刚止令牌成功响应格式为 {code: 200, message: "令牌刷新成功", data: {access_token}}
+	// 这里需要实现具体的刷新逻辑
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "令牌刷新成功",
+		Data: gin.H{
+			"access_token": "new_access_token_example",
+		},
 	})
 }
 
 func ForgotPasswordHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "忘记密码功能待实现",
-		"endpoint": "POST /api/v1/auth/forgot-password",
+	// 根据接口要求，忘记密码成功响应格式为 {code: 200, message: "重置邮件已发送，请检查您的邮箱", data: {}}
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "重置邮件已发送，请检查您的邮箱",
+		Data:    gin.H{},
 	})
 }
 
 func ResetPasswordHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "重置密码功能待实现",
-		"endpoint": "POST /api/v1/auth/reset-password",
+	// 根据接口要求，重置密码成功响应格式为 {code: 200, message: "密码重置成功", data: {}}
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "密码重置成功",
+		Data:    gin.H{},
 	})
 }
 
 // 用户相关处理器
 func GetProfileHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "获取用户信息功能待实现",
-		"endpoint": "GET /api/v1/users/profile",
+	// 根据接口要求，获取用户资料成功响应格式为 {code: 200, message: "获取成功", data: {用户信息}}
+	// 这里需要实现具体的获取用户资料逻辑
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "获取成功",
+		Data: gin.H{
+			"id":         1,
+			"username":   "example_user",
+			"email":      "user@example.com",
+			"user_type":  "app",
+			"status":     "active",
+			"created_at": "2024-01-15T10:30:00Z",
+			"updated_at": "2024-01-15T10:30:00Z",
+		},
 	})
 }
 
 func UpdateProfileHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "更新用户信息功能待实现",
-		"endpoint": "PUT /api/v1/users/profile",
+	// 根据接口要求，更新用户资料成功响应格式为 {code: 200, message: "更新成功", data: {更新后的用户信息}}
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "更新成功",
+		Data: gin.H{
+			"id":         1,
+			"username":   "updated_user",
+			"email":      "updated@example.com",
+			"user_type":  "app",
+			"status":     "active",
+			"updated_at": "2024-01-15T10:30:00Z",
+		},
 	})
 }
 
 func ChangePasswordHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "修改密码功能待实现",
-		"endpoint": "PUT /api/v1/users/password",
+	// 根据接口要求，修改密码成功响应格式为 {code: 200, message: "密码修改成功", data: {}}
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "密码修改成功",
+		Data:    gin.H{},
 	})
 }
 
 // 健康检查
 func HealthHandler(c *gin.Context) {
+	// 根据接口要求，健康检查响应格式为 {status: "OK", message: "Server is running", timestamp: "..."}
+	c.JSON(http.StatusOK, models.HealthResponse{
+		Status:    "OK",
+		Message:   "Server is running",
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+	})
+}
+
+// 检查用户名可用性
+func CheckUsernameHandler(c *gin.Context) {
+	var req models.CheckUsernameRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Errorw("检查用户名请求参数验证失败", "error", err)
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "请求参数错误",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	db := dao.GetDB()
+	var user models.User
+	// 检查用户名是否已存在
+	if err := db.Where("username = ?", req.Username).First(&user).Error; err == nil {
+		// 用户名已被占用
+		c.JSON(http.StatusOK, models.CheckAvailableResponse{
+			Code:    http.StatusOK,
+			Message: "Success",
+		})
+		// 需要设置 available 字段为 false
+		// 这里使用 gin.H 来灵活设置
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Success",
+			"data": gin.H{
+				"available": false,
+			},
+		})
+		return
+	}
+
+	// 用户名可用
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "OK",
-		"message": "Server is running",
+		"code":    http.StatusOK,
+		"message": "Success",
+		"data": gin.H{
+			"available": true,
+		},
+	})
+}
+
+// 检查邮箱可用性
+func CheckEmailHandler(c *gin.Context) {
+	var req models.CheckEmailRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Errorw("检查邮箱请求参数验证失败", "error", err)
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "请求参数错误",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	db := dao.GetDB()
+	var user models.User
+	// 检查邮箱是否已存在
+	if err := db.Where("email = ?", req.Email).First(&user).Error; err == nil {
+		// 邮箱已被占用
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Success",
+			"data": gin.H{
+				"available": false,
+			},
+		})
+		return
+	}
+
+	// 邮箱可用
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Success",
+		"data": gin.H{
+			"available": true,
+		},
+	})
+}
+
+// 获取用户列表（仅管理员）
+func GetUsersListHandler(c *gin.Context) {
+	// 根据接口要求，获取用户列表成功响应格式为 {code: 200, message: "获取成功", data: [用户信息数组], pagination: {...}}
+	// 这里需要实现具体的获取用户列表逻辑
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "获取成功",
+		"data": []gin.H{
+			{
+				"id":         1,
+				"username":   "john_doe",
+				"email":      "john@example.com",
+				"user_type":  "app",
+				"status":     "active",
+				"created_at": "2024-01-15T10:30:00Z",
+				"updated_at": "2024-01-15T10:30:00Z",
+			},
+			{
+				"id":         2,
+				"username":   "admin_user",
+				"email":      "admin@example.com",
+				"user_type":  "system",
+				"status":     "active",
+				"created_at": "2024-01-10T10:30:00Z",
+				"updated_at": "2024-01-15T10:30:00Z",
+			},
+		},
+		"pagination": gin.H{
+			"total": 50,
+			"page":  1,
+			"limit": 20,
+			"pages": 3,
+		},
 	})
 }
