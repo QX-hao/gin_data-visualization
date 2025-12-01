@@ -4,11 +4,22 @@ import (
 	"go-web/internal/controller"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 func SetupRouter() *gin.Engine {
 
 	engine := gin.Default()
+
+	// 添加CORS中间件
+	engine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge: 12 * 60 * 60, // 12 hours
+	}))
 
 	api := engine.Group("/api/v1")
 	{

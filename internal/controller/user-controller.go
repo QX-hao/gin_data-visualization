@@ -2,7 +2,7 @@ package controller
 
 import (
 	"go-web/internal/dao"
-	models "go-web/internal/moudels"
+	"go-web/internal/models"
 	"go-web/pkg/logger"
 	"go-web/pkg/token"
 	"net/http"
