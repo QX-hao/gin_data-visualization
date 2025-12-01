@@ -287,12 +287,6 @@ func CheckUsernameHandler(c *gin.Context) {
 	// 检查用户名是否已存在
 	if err := db.Where("username = ?", req.Username).First(&user).Error; err == nil {
 		// 用户名已被占用
-		c.JSON(http.StatusOK, models.CheckAvailableResponse{
-			Code:    http.StatusOK,
-			Message: "Success",
-		})
-		// 需要设置 available 字段为 false
-		// 这里使用 gin.H 来灵活设置
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "Success",
