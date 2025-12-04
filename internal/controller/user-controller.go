@@ -51,7 +51,7 @@ func RegisterHandler(c *gin.Context) {
 	}
 
 	// 加密密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
 		logger.Errorw("密码加密失败", "error", err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -63,17 +63,17 @@ func RegisterHandler(c *gin.Context) {
 	}
 
 	// 设置用户类型，如果未提供则默认为app
-	userType := models.UserTypeApp
-	if req.UserType != "" {
-		userType = models.UserType(req.UserType)
-	}
+	// userType := models.UserTypeApp
+	// if req.UserType != "" {
+	// 	userType = models.UserType(req.UserType)
+	// }
 
 	// 创建新用户
 	newUser := models.User{
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
-		UserType:     userType,
+		// UserType:     userType,
 		Status:       models.UserStatusActive, // 默认激活状态
 	}
 
@@ -139,7 +139,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 验证密码
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.PasswordHash)); err != nil {
 		logger.Warnw("密码错误", "user_id", user.ID)
 		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Code:    http.StatusUnauthorized,

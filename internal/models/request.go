@@ -4,14 +4,14 @@ package models
 type RegisterRequest struct {
 	Username string `json:"username" binding:"required,min=3,max=20"`
 	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`                    // SHA-256 哈希值
-	UserType string `json:"user_type" binding:"omitempty,oneof=system app"` // 可选，默认为'app'
+	PasswordHash string `json:"password" binding:"required"`                    // SHA-256 哈希值
+	// UserType string `json:"user_type" binding:"omitempty,oneof=system app"` // 可选，默认为'app'
 }
 
 // LoginRequest 登录请求
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"` // 用户名或邮箱
-	Password string `json:"password" binding:"required"` // SHA-256 哈希值
+	PasswordHash string `json:"password" binding:"required"` // SHA-256 哈希值
 }
 
 // RefreshTokenRequest 刷新令牌请求
