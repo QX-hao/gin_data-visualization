@@ -13,7 +13,8 @@ func SetupRouter() *gin.Engine {
 
 	// 添加CORS中间件
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
+		AllowAllOrigins: true,
+		// AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -28,6 +29,14 @@ func SetupRouter() *gin.Engine {
 		{
 			auth.POST("/register", controller.RegisterHandler)
 			auth.POST("/login", controller.LoginHandler)
+			// auth.POST("/login", func(c *gin.Context) {
+			// 	// 直接返回一个 401 错误，不进行任何数据库查询或逻辑判断
+			// 	c.JSON(401, gin.H{
+			// 		"code":    401,
+			// 		"message": "这是一个直接返回的401测试",
+			// 	})
+			// })
+
 			auth.POST("/logout", controller.LogoutHandler)
 			auth.POST("/refresh", controller.RefreshTokenHandler)
 			auth.POST("/forgot-password", controller.ForgotPasswordHandler)
