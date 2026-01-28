@@ -47,6 +47,10 @@ func SetupRouter() *gin.Engine {
 			public.GET("/brand/sales", controller.GetBrandSales)
 			public.GET("/brand/top-sales", controller.GetTopBrandSales)
 			public.GET("/brand/last-sales", controller.GetLastBrandSales)
+			// 汽车级别分布API
+			public.GET("/car-level/distribution", controller.GetCarLevelDistribution)
+			public.GET("/car-level/top", controller.GetTopCarLevels)
+			public.GET("/car-level/last", controller.GetLastCarLevels)
 		}
 
 		// 受保护的路由（需要认证）
